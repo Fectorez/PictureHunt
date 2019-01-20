@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "210033024094",
+    "firebase_url": "https://picturehunt-8ab3c.firebaseio.com",
+    "project_id": "picturehunt-8ab3c",
+    "storage_bucket": "picturehunt-8ab3c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210033024094:android:4e227f9d289225af",
+        "android_client_info": {
+          "package_name": "com.esgi.picturehunt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "210033024094-6hrn8q2udch91l124qkdfd81lltv3kuc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esgi.picturehunt",
+            "certificate_hash": "93f14450bb661b2bdeab4c7486aa1d2fe61e907d"
+          }
+        },
+        {
+          "client_id": "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAR7JA0WfWLBOTXvcA00UV34bvqCPOkLgI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
