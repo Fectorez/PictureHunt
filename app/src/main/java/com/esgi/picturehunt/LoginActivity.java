@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,6 +29,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 public class LoginActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 1;
     public static final String AUTH_TAG = "AUTH_TAG";
@@ -37,6 +41,10 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView mImageView;
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
+    private TextView mScore;
+    private TextView mPseudo;
+    private SeekBar mSeekBar;
+    private TextView mTextViewRadius;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,10 @@ public class LoginActivity extends AppCompatActivity {
         mSignInButton = findViewById(R.id.sign_in_button);
         mSignOutButton = findViewById(R.id.sign_out_buton);
         mImageView = findViewById(R.id.imageView);
+        mScore = findViewById(R.id.score);
+        mPseudo = findViewById(R.id.pseudo);
+        mSeekBar = findViewById(R.id.seekBar);
+        mTextViewRadius = findViewById(R.id.textViewRadius);
         mGso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -124,6 +136,10 @@ public class LoginActivity extends AppCompatActivity {
             mSignInButton.setVisibility(View.VISIBLE);
             mSignOutButton.setVisibility(View.GONE);
             mImageView.setImageResource(android.R.color.transparent);
+            mScore.setVisibility(View.GONE);
+            mPseudo.setVisibility(View.GONE);
+            mTextViewRadius.setVisibility(View.GONE);
+            mSeekBar.setVisibility(View.GONE);
         }
         else {
             Uri photoUrl = mUser.getPhotoUrl();
@@ -133,8 +149,13 @@ public class LoginActivity extends AppCompatActivity {
             else {
                 mImageView.setImageResource(R.drawable.avatar_drawable);
             }
+            mPseudo.setText(mUser.getDisplayName());
             mSignInButton.setVisibility(View.GONE);
             mSignOutButton.setVisibility(View.VISIBLE);
+            mScore.setVisibility(View.VISIBLE);
+            mPseudo.setVisibility(View.VISIBLE);
+            mTextViewRadius.setVisibility(View.VISIBLE);
+            mSeekBar.setVisibility(View.VISIBLE);
         }
     }
 }
