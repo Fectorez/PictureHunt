@@ -22,6 +22,7 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.signin.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,10 +32,14 @@ import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.util.Locale;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+
 public class LoginActivity extends AppCompatActivity {
+    private static final String SERVER_CLIENT_ID = "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com";
     public static final int RC_SIGN_IN = 1;
     public static final String AUTH_TAG = "AUTH_TAG";
-    private GoogleSignInOptions mGso;
     private GoogleSignInClient mGoogleSignInClient;
     private Button mSignOutButton;
     private SignInButton mSignInButton;
@@ -42,29 +47,33 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
     private TextView mScore;
+    private TextView mScoreTxt;
     private TextView mPseudo;
     private SeekBar mSeekBar;
-    private TextView mTextViewRadius;
+    private TextView mRadiusTxt;
+    private TextView mRadius;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
+    private void setAttributes() {
         mSignInButton = findViewById(R.id.sign_in_button);
         mSignOutButton = findViewById(R.id.sign_out_buton);
         mImageView = findViewById(R.id.imageView);
         mScore = findViewById(R.id.score);
+        mScoreTxt = findViewById(R.id.scoreTxt);
         mPseudo = findViewById(R.id.pseudo);
         mSeekBar = findViewById(R.id.seekBar);
-        mTextViewRadius = findViewById(R.id.textViewRadius);
-        mGso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+        mRadiusTxt = findViewById(R.id.radiusTxt);
+        mRadius = findViewById(R.id.radius);
+        GoogleSignInOptions mGso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(SERVER_CLIENT_ID)
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, mGso);
         mAuth = FirebaseAuth.getInstance();
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    }
 
+    private void initAttributes() {
         mSignInButton.setSize(SignInButton.SIZE_WIDE);
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +90,29 @@ public class LoginActivity extends AppCompatActivity {
                 updateUI();
             }
         });
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mRadius.setText(String.format(Locale.FRENCH,"%d km",progress+1));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mFirebaseAnalytics.setUserProperty("radius",Integer.toString(seekBar.getProgress()));
+            }
+        });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        setAttributes();
+        initAttributes();
     }
 
     @Override
@@ -92,6 +124,10 @@ public class LoginActivity extends AppCompatActivity {
         if ( account != null ) {
             Toast.makeText(this, "Ravi de vous revoir " + account.getDisplayName(), Toast.LENGTH_SHORT).show();
             firebaseAuthWithGoogle(account);
+            if ( mUser != null ) {
+                //String uid = mUser.getUid();
+                //mSeekBar.setProgress(mUser.);
+            }
         }
     }
 
@@ -99,11 +135,22 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if ( requestCode == RC_SIGN_IN ) {
+            Log.i("DEBUG_TAG","ici1");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            GoogleSignInAccount account = task.getResult();
+            Log.i("DEBUG_TAG","ici2");
+            GoogleSignInAccount account=null;
+            try {
+                account = task.getResult();
+            } catch ( Exception e ){
+                Log.i("DEBUG_TAG",e.getMessage()+"...");
+                e.printStackTrace();
+            }
+            Log.i("DEBUG_TAG","ici3");
             if ( account != null ) {
+                Log.i("DEBUG_TAG","ici4");
                 firebaseAuthWithGoogle(account);
             }
+            Log.i("DEBUG_TAG","ici5");
         }
     }
 
@@ -138,13 +185,18 @@ public class LoginActivity extends AppCompatActivity {
             mImageView.setImageResource(android.R.color.transparent);
             mScore.setVisibility(View.GONE);
             mPseudo.setVisibility(View.GONE);
-            mTextViewRadius.setVisibility(View.GONE);
+            mRadiusTxt.setVisibility(View.GONE);
+            mScoreTxt.setVisibility(View.GONE);
             mSeekBar.setVisibility(View.GONE);
+            mRadius.setVisibility(View.GONE);
         }
         else {
             Uri photoUrl = mUser.getPhotoUrl();
             if ( photoUrl != null ) {
-                Picasso.get().load(photoUrl).into(mImageView);
+                Picasso.get()
+                        .load(photoUrl)
+                        .transform(new CropCircleTransformation())
+                        .into(mImageView);
             }
             else {
                 mImageView.setImageResource(R.drawable.avatar_drawable);
@@ -153,9 +205,11 @@ public class LoginActivity extends AppCompatActivity {
             mSignInButton.setVisibility(View.GONE);
             mSignOutButton.setVisibility(View.VISIBLE);
             mScore.setVisibility(View.VISIBLE);
+            mScoreTxt.setVisibility(View.VISIBLE);
             mPseudo.setVisibility(View.VISIBLE);
-            mTextViewRadius.setVisibility(View.VISIBLE);
+            mRadiusTxt.setVisibility(View.VISIBLE);
             mSeekBar.setVisibility(View.VISIBLE);
+            mRadius.setVisibility(View.VISIBLE);
         }
     }
 }
