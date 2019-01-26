@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.data.DataBufferSafeParcelable;
 import com.google.android.gms.signin.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -28,6 +29,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
@@ -53,6 +56,9 @@ public class LoginActivity extends AppCompatActivity {
     private TextView mRadiusTxt;
     private TextView mRadius;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mUsersRef;
+    private DatabaseReference mUserRef;
 
     private void setAttributes() {
         mSignInButton = findViewById(R.id.sign_in_button);
@@ -71,6 +77,8 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, mGso);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mDatabase = FirebaseDatabase.getInstance();
+        mUsersRef = mDatabase.getReference("users");
     }
 
     private void initAttributes() {
@@ -101,6 +109,10 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                String email = mUser.getEmail();
+                String emailCodeDB = mUser.getEmail().replace('.','_').replace('@','_');
+                mUserRef = mUsersRef.child(emailCodeDB);
+                mUserRef.setValue(Integer.toString(seekBar.getProgress()+1));
                 mFirebaseAnalytics.setUserProperty("radius",Integer.toString(seekBar.getProgress()));
             }
         });
@@ -119,6 +131,10 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mUser = mAuth.getCurrentUser();
+        /*String email = mUser.getEmail();
+        String emailCodeDB = mUser.getEmail().replace('.','_').replace('@','_');
+        mUserRef = mUsersRef.child(emailCodeDB);
+        Log.i(AUTH_TAG,"mUserRef="+mUserRef);*/
         updateUI();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if ( account != null ) {
@@ -135,22 +151,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if ( requestCode == RC_SIGN_IN ) {
-            Log.i("DEBUG_TAG","ici1");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            Log.i("DEBUG_TAG","ici2");
-            GoogleSignInAccount account=null;
-            try {
-                account = task.getResult();
-            } catch ( Exception e ){
-                Log.i("DEBUG_TAG",e.getMessage()+"...");
-                e.printStackTrace();
-            }
-            Log.i("DEBUG_TAG","ici3");
+            GoogleSignInAccount account = task.getResult();
             if ( account != null ) {
-                Log.i("DEBUG_TAG","ici4");
                 firebaseAuthWithGoogle(account);
             }
-            Log.i("DEBUG_TAG","ici5");
         }
     }
 
