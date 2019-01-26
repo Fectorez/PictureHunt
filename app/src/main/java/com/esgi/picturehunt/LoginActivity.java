@@ -3,7 +3,6 @@ package com.esgi.picturehunt;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,8 +18,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.data.DataBufferSafeParcelable;
-import com.google.android.gms.signin.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -29,13 +26,15 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
 import java.util.Locale;
+import static java.lang.Math.toIntExact;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
@@ -56,9 +55,10 @@ public class LoginActivity extends AppCompatActivity {
     private TextView mRadiusTxt;
     private TextView mRadius;
     private FirebaseAnalytics mFirebaseAnalytics;
-    private FirebaseDatabase mDatabase;
-    private DatabaseReference mUsersRef;
+    private DatabaseReference mDatabase;
+    private DatabaseReference mUsersListRef;
     private DatabaseReference mUserRef;
+    private DatabaseReference mRadiusRef;
 
     private void setAttributes() {
         mSignInButton = findViewById(R.id.sign_in_button);
@@ -77,8 +77,8 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, mGso);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        mDatabase = FirebaseDatabase.getInstance();
-        mUsersRef = mDatabase.getReference("users");
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mUsersListRef = mDatabase.child("users");
     }
 
     private void initAttributes() {
@@ -94,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mAuth.signOut();
+                mGoogleSignInClient.signOut();
                 mUser = mAuth.getCurrentUser();
                 updateUI();
             }
@@ -109,11 +110,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                String email = mUser.getEmail();
-                String emailCodeDB = mUser.getEmail().replace('.','_').replace('@','_');
-                mUserRef = mUsersRef.child(emailCodeDB);
-                mUserRef.setValue(Integer.toString(seekBar.getProgress()+1));
-                mFirebaseAnalytics.setUserProperty("radius",Integer.toString(seekBar.getProgress()));
+                mRadiusRef.setValue(seekBar.getProgress()+1);
             }
         });
     }
@@ -122,7 +119,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         setAttributes();
         initAttributes();
     }
@@ -131,20 +127,58 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mUser = mAuth.getCurrentUser();
-        /*String email = mUser.getEmail();
-        String emailCodeDB = mUser.getEmail().replace('.','_').replace('@','_');
-        mUserRef = mUsersRef.child(emailCodeDB);
-        Log.i(AUTH_TAG,"mUserRef="+mUserRef);*/
         updateUI();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if ( account != null ) {
-            Toast.makeText(this, "Ravi de vous revoir " + account.getDisplayName(), Toast.LENGTH_SHORT).show();
-            firebaseAuthWithGoogle(account);
-            if ( mUser != null ) {
-                //String uid = mUser.getUid();
-                //mSeekBar.setProgress(mUser.);
+        if ( mUser == null ) {
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+            if ( account != null ) {
+                Toast.makeText(this, "Ravi de vous revoir " + account.getDisplayName(), Toast.LENGTH_SHORT).show();
+                firebaseAuthWithGoogle(account);
             }
         }
+        else {
+            initRadiusAndScore();
+        }
+    }
+
+    private void initRadiusAndScore() {
+        mUsersListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mUserRef = mUsersListRef.child(mUser.getUid());
+                mRadiusRef = mUserRef.child("radius");
+                DatabaseReference scoreRef = mUserRef.child("score");
+                if (!dataSnapshot.hasChild(mUser.getUid())) {
+                    // user pas connu donc init ses attributs
+                    mRadiusRef.setValue(3);
+                    mSeekBar.setProgress(2);
+                    scoreRef.setValue(0);
+                    updateUI();
+                } else {
+                    // user connu donc on va chercher ses attributs
+                    mRadiusRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            mSeekBar.setProgress(toIntExact((long)dataSnapshot.getValue()-1), false);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {}
+                    });
+                    scoreRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            mScore.setText(String.valueOf((long)dataSnapshot.getValue()));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {}
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
+        });
     }
 
     @Override
@@ -172,12 +206,13 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d(AUTH_TAG, "signInWithCredential:success");
                             Toast.makeText(LoginActivity.this, "Vous êtes maintenant connecté", Toast.LENGTH_SHORT).show();
                             mUser = mAuth.getCurrentUser();
+                            initRadiusAndScore();
                             updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(AUTH_TAG, "signInWithCredential:failure", task.getException());
+                            Toast.makeText(LoginActivity.this, "Erreur lors de la connexion", Toast.LENGTH_SHORT).show();
                             //Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-                            updateUI();
                         }
                     }
                 });
@@ -204,7 +239,7 @@ public class LoginActivity extends AppCompatActivity {
                         .into(mImageView);
             }
             else {
-                mImageView.setImageResource(R.drawable.avatar_drawable);
+                //mImageView.setImageResource(R.drawable.avatar_drawable);
             }
             mPseudo.setText(mUser.getDisplayName());
             mSignInButton.setVisibility(View.GONE);
