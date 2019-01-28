@@ -9,10 +9,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 public class CameraFragment extends Fragment {
     private ImageView imageView;
+    private Button btnValidate;
+    private Button btnCancel;
 
     @Nullable
     @Override
@@ -20,6 +23,8 @@ public class CameraFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_camera, container, false);
 
         imageView = view.findViewById(R.id.imageView);
+        btnValidate = view.findViewById(R.id.btn_validate);
+        btnCancel = view.findViewById(R.id.btn_cancel);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, 0);
@@ -33,6 +38,8 @@ public class CameraFragment extends Fragment {
         if(resultCode == -1) {
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(bitmap);
+            btnValidate.setVisibility(View.VISIBLE);
+            btnCancel.setVisibility(View.VISIBLE);
         }
         else{
             Intent intent = new Intent(getContext(),MainActivity.class);
