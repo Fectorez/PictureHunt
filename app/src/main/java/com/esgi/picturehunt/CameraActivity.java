@@ -1,10 +1,18 @@
 package com.esgi.picturehunt;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,16 +21,74 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.support.v4.content.FileProvider;
+import android.widget.TextView;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class CameraActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_CAMERA = "LIFE_CYCLE_CAMERA";
+    public static final String CAMERA_LOG = "CAMERA_LOG";
+
+    private TextView latitude, longitude, userLatitude, userLongitude;
+    private Button btnTakePicture, btnValidatePicture, btnCancel;
     private ImageView imageView;
+    private FusedLocationProviderClient client;
+    private String pathToFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+        latitude = findViewById(R.id.latitude);
+        longitude = findViewById(R.id.longitude);
+        userLatitude = findViewById(R.id.userLatitude);
+        userLongitude = findViewById(R.id.userLongitude);
+        btnTakePicture = findViewById(R.id.takePicture);
+        btnValidatePicture = findViewById(R.id.validatePicture);
+        btnCancel = findViewById(R.id.cancel);
+        imageView = findViewById(R.id.myPicture);
+        client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
+
+        if(Build.VERSION.SDK_INT >= 23){
+            requestPermissions(new String[] {Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.ACCESS_FINE_LOCATION}, 2);
+        }
+
+        btnTakePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ActivityCompat.checkSelfPermission(
+                        CameraActivity.this,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    return;
+                }
+                client.getLastLocation().addOnSuccessListener(CameraActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location != null){
+                            userLatitude.setText("" + location.getLatitude());
+                            userLongitude.setText("" + location.getLongitude());
+                        }
+                    }
+                });
+                dispatchPictureTakerAction();
+            }
+        });
+        //Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //startActivityForResult(intent, 0);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -30,9 +96,6 @@ public class CameraActivity extends AppCompatActivity {
         Menu menu = bottomNav.getMenu();
         MenuItem menuItem = menu.getItem(1);
         menuItem.setChecked(true);
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, 0);
     }
 
     @Override
@@ -74,14 +137,58 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == -1) {
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(bitmap);
+        if(resultCode == RESULT_OK) {
+            if(requestCode == 1) {
+                Bitmap bitmap = BitmapFactory.decodeFile(pathToFile);
+                imageView.setImageBitmap(bitmap);
+                btnTakePicture.setVisibility(View.INVISIBLE);
+                btnValidatePicture.setVisibility(View.VISIBLE);
+                btnCancel.setVisibility(View.VISIBLE);
+                latitude.setVisibility(View.VISIBLE);
+                longitude.setVisibility(View.VISIBLE);
+                userLatitude.setVisibility(View.VISIBLE);
+                userLongitude.setVisibility(View.VISIBLE);
+
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(CameraActivity.this, CameraActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+            }
         }
-        else{
-            Intent intent = new Intent(this,MainActivity.class);
-            startActivity(intent);
+    }
+
+    private void dispatchPictureTakerAction() {
+        Intent takePic = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(takePic.resolveActivity(getPackageManager()) != null) {
+
+            File photoFile = null;
+            photoFile = createPhotoFile();
+
+            if(photoFile != null){
+
+                pathToFile = photoFile.getAbsolutePath();
+                Uri photoURI = FileProvider.getUriForFile(CameraActivity.this, "com.esgi.picturehunt.fileprovider", photoFile);
+                takePic.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePic, 1);
+            }
         }
+    }
+
+    private File createPhotoFile() {
+        String name = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = null;
+
+        try {
+            image = File.createTempFile(name, ".jpg", storageDir);
+        } catch (IOException e) {
+            Log.d(CAMERA_LOG, "Exception" + e.toString());
+        }
+        return image;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
