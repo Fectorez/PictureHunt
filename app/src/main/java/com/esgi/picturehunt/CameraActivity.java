@@ -68,23 +68,10 @@ public class CameraActivity extends AppCompatActivity {
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ActivityCompat.checkSelfPermission(
-                        CameraActivity.this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                    return;
-                }
-                client.getLastLocation().addOnSuccessListener(CameraActivity.this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if(location != null){
-                            userLatitude.setText("Latitude : " + location.getLatitude());
-                            userLongitude.setText("Longitude : " + location.getLongitude());
-                        }
-                    }
-                });
                 dispatchPictureTakerAction();
             }
         });
+
         //Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         //startActivityForResult(intent, 0);
 
@@ -137,6 +124,23 @@ public class CameraActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK) {
             if(requestCode == 1) {
+
+                //Récupération de la géolocalisation de l'utilisateur
+                if(ActivityCompat.checkSelfPermission(
+                        CameraActivity.this,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    return;
+                }
+                client.getLastLocation().addOnSuccessListener(CameraActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location != null){
+                            userLatitude.setText("Latitude : " + location.getLatitude());
+                            userLongitude.setText("Longitude : " + location.getLongitude());
+                        }
+                    }
+                });
+
                 Bitmap bitmap = BitmapFactory.decodeFile(pathToFile);
                 myPicture.setImageBitmap(bitmap);
                 btnTakePicture.setVisibility(View.INVISIBLE);
@@ -160,7 +164,6 @@ public class CameraActivity extends AppCompatActivity {
     private void dispatchPictureTakerAction() {
         Intent takePic = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if(takePic.resolveActivity(getPackageManager()) != null) {
-
             File photoFile = null;
             photoFile = createPhotoFile();
 
