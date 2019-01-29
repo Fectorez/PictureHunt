@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private void setAttributes() {
         mSignInButton = findViewById(R.id.sign_in_button);
         mSignOutButton = findViewById(R.id.sign_out_buton);
-        mImageView = findViewById(R.id.myPicture);
+        mImageView = findViewById(R.id.profilePicture);
         mScore = findViewById(R.id.score);
         mScoreTxt = findViewById(R.id.scoreTxt);
         mPseudo = findViewById(R.id.pseudo);

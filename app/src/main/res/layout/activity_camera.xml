@@ -19,13 +19,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
         tools:text="TAKE A PICTURE" />
-    
+
     <ImageView
         android:id="@+id/myPicture"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="400dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -63,6 +62,7 @@
         app:layout_constraintEnd_toEndOf="@+id/takePicture"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/myPicture"
+        app:layout_constraintVertical_bias="0.26"
         tools:text="VALIDATE" />
 
     <Button
@@ -79,6 +79,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/takePicture"
         app:layout_constraintTop_toBottomOf="@+id/myPicture"
+        app:layout_constraintVertical_bias="0.26"
         tools:text="CANCEL" />
 
     <TextView
@@ -91,10 +92,11 @@
         android:layout_marginBottom="8dp"
         android:textAlignment="center"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/takePicture"
+        app:layout_constraintBottom_toTopOf="@+id/myPicture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.23000002" />
 
     <TextView
         android:id="@+id/userLongitude"
@@ -106,41 +108,10 @@
         android:layout_marginBottom="8dp"
         android:textAlignment="center"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/takePicture"
+        app:layout_constraintBottom_toTopOf="@+id/myPicture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userLatitude" />
-
-    <TextView
-        android:id="@+id/latitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="Latitude :"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/takePicture"
-        app:layout_constraintEnd_toStartOf="@+id/userLatitude"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Latitude :" />
-
-    <TextView
-        android:id="@+id/longitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="Longitude :"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/takePicture"
-        app:layout_constraintEnd_toStartOf="@+id/userLongitude"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/latitude"
-        tools:text="Longitude :" />
+        app:layout_constraintTop_toBottomOf="@+id/userLatitude"
+        app:layout_constraintVertical_bias="0.32999998" />
 
 </android.support.constraint.ConstraintLayout>

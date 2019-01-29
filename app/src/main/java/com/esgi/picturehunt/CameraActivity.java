@@ -40,9 +40,9 @@ public class CameraActivity extends AppCompatActivity {
     public static final String LIFE_CYCLE_CAMERA = "LIFE_CYCLE_CAMERA";
     public static final String CAMERA_LOG = "CAMERA_LOG";
 
-    private TextView latitude, longitude, userLatitude, userLongitude;
+    private TextView userLatitude, userLongitude;
     private Button btnTakePicture, btnValidatePicture, btnCancel;
-    private ImageView imageView;
+    private ImageView myPicture;
     private FusedLocationProviderClient client;
     private String pathToFile;
 
@@ -51,14 +51,12 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        latitude = findViewById(R.id.latitude);
-        longitude = findViewById(R.id.longitude);
         userLatitude = findViewById(R.id.userLatitude);
         userLongitude = findViewById(R.id.userLongitude);
         btnTakePicture = findViewById(R.id.takePicture);
         btnValidatePicture = findViewById(R.id.validatePicture);
         btnCancel = findViewById(R.id.cancel);
-        imageView = findViewById(R.id.myPicture);
+        myPicture = findViewById(R.id.myPicture);
         client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
 
         if(Build.VERSION.SDK_INT >= 23){
@@ -79,8 +77,8 @@ public class CameraActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Location location) {
                         if(location != null){
-                            userLatitude.setText("" + location.getLatitude());
-                            userLongitude.setText("" + location.getLongitude());
+                            userLatitude.setText("Latitude : " + location.getLatitude());
+                            userLongitude.setText("Longitude : " + location.getLongitude());
                         }
                     }
                 });
@@ -140,12 +138,10 @@ public class CameraActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK) {
             if(requestCode == 1) {
                 Bitmap bitmap = BitmapFactory.decodeFile(pathToFile);
-                imageView.setImageBitmap(bitmap);
+                myPicture.setImageBitmap(bitmap);
                 btnTakePicture.setVisibility(View.INVISIBLE);
                 btnValidatePicture.setVisibility(View.VISIBLE);
                 btnCancel.setVisibility(View.VISIBLE);
-                latitude.setVisibility(View.VISIBLE);
-                longitude.setVisibility(View.VISIBLE);
                 userLatitude.setVisibility(View.VISIBLE);
                 userLongitude.setVisibility(View.VISIBLE);
 
