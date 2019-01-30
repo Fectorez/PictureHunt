@@ -9,9 +9,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_MAIN = "LIFE_CYCLE_MAIN";
+
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser mUser = mAuth.getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,12 +25,21 @@ public class MainActivity extends AppCompatActivity {
         Log.i(LIFE_CYCLE_MAIN, "onCreate");
         setContentView(R.layout.activity_main);
 
+        if ( mUser == null )
+            goToLogin();
+
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
         Menu menu = bottomNav.getMenu();
         MenuItem menuItem = menu.getItem(0);
         menuItem.setChecked(true);
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override

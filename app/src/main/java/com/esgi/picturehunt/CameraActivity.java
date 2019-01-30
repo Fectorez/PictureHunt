@@ -30,6 +30,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -61,10 +63,16 @@ public class CameraActivity extends AppCompatActivity {
     private String pathToFile, ID, image;
     private double latitude, longitude;
 
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser mUser = mAuth.getCurrentUser();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+        if ( mUser == null )
+            goToLogin();
 
         userLatitude = findViewById(R.id.userLatitude);
         userLongitude = findViewById(R.id.userLongitude);
@@ -117,6 +125,12 @@ public class CameraActivity extends AppCompatActivity {
         Menu menu = bottomNav.getMenu();
         MenuItem menuItem = menu.getItem(1);
         menuItem.setChecked(true);
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -218,8 +232,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void addPhotoToHunt(){
-        //TODO : pour modUser > mettre le nom/prénom de l'utilisateur connecté
-        PhotoToHunt photoToHunt = new PhotoToHunt("MCA", image, latitude, longitude);
+        PhotoToHunt photoToHunt = new PhotoToHunt(mUser.getUid(), image, latitude, longitude);
 
         databasePhotoToHunt.child(ID).setValue(photoToHunt);
 

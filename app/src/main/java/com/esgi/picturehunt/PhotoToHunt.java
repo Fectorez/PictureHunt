@@ -1,7 +1,7 @@
 package com.esgi.picturehunt;
 
 public class PhotoToHunt {
-    String modUser;
+    String userId;
     String image;
     double latitude;
     double longitude;
@@ -9,15 +9,15 @@ public class PhotoToHunt {
     public PhotoToHunt(){
     }
 
-    public PhotoToHunt(String modUser, String image, double latitude, double longitude) {
-        this.modUser = modUser;
+    public PhotoToHunt(String userId, String image, double latitude, double longitude) {
+        this.userId = userId;
         this.image = image;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public String getModUser() {
-        return modUser;
+    public String getUserId() {
+        return userId;
     }
 
     public String image() {
