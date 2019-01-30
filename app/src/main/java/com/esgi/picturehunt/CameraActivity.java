@@ -128,7 +128,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void goToLogin() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
