@@ -72,12 +72,13 @@ public class CameraActivity extends AppCompatActivity {
         btnValidatePicture = findViewById(R.id.validatePicture);
         btnCancel = findViewById(R.id.cancel);
         myPicture = findViewById(R.id.myPicture);
+
         client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
-        databasePhotoToHunt = FirebaseDatabase.getInstance().getReference("photoToHunt");
+        databasePhotoToHunt = FirebaseDatabase.getInstance().getReference("photosToHunt");
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
-        if(Build.VERSION.SDK_INT >= 23){
+        if(Build.VERSION.SDK_INT >= 24){
             requestPermissions(new String[] {Manifest.permission.CAMERA,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.ACCESS_FINE_LOCATION}, 2);
@@ -95,6 +96,15 @@ public class CameraActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ID = databasePhotoToHunt.push().getKey();
                 uploadPhoto();
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CameraActivity.this, CameraActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -150,8 +160,6 @@ public class CameraActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK) {
             if(requestCode == 1) {
-
-                //Récupération de la géolocalisation de l'utilisateur
                 if(ActivityCompat.checkSelfPermission(
                         CameraActivity.this,
                         android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
@@ -176,15 +184,6 @@ public class CameraActivity extends AppCompatActivity {
                 btnCancel.setVisibility(View.VISIBLE);
                 userLatitude.setVisibility(View.VISIBLE);
                 userLongitude.setVisibility(View.VISIBLE);
-
-                btnCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(CameraActivity.this, CameraActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
             }
         }
     }
@@ -233,7 +232,7 @@ public class CameraActivity extends AppCompatActivity {
             progressDialog.setTitle("Uploading ...");
             progressDialog.show();
 
-            final StorageReference ref = storageReference.child("images/" + ID);
+            final StorageReference ref = storageReference.child("images/photosToHunt/" + ID);
             ref.putFile(photoURI)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
