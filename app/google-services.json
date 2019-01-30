@@ -23,6 +23,22 @@
           }
         },
         {
+          "client_id": "210033024094-p066se9iepc43cnbkg1549t6jf0j1o2c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esgi.picturehunt",
+            "certificate_hash": "e640a81db3b49e1431355b6de4af1bec540e6f37"
+          }
+        },
+        {
+          "client_id": "210033024094-p5rl82itrmnvj1tl8hlp8ulpkt0b88r2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esgi.picturehunt",
+            "certificate_hash": "4bc515658fee71162683dfc6fc6a6b7e2464ce57"
+          }
+        },
+        {
           "client_id": "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com",
           "client_type": 3
         }

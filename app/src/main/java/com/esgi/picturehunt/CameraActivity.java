@@ -1,6 +1,7 @@
 package com.esgi.picturehunt;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -23,10 +24,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.support.v4.content.FileProvider;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +53,13 @@ public class CameraActivity extends AppCompatActivity {
     private Button btnTakePicture, btnValidatePicture, btnCancel;
     private ImageView myPicture;
     private FusedLocationProviderClient client;
-    private String pathToFile;
+    private DatabaseReference databasePhotoToHunt;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
+    private Uri photoURI;
+
+    private String pathToFile, ID, image;
+    private double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +73,9 @@ public class CameraActivity extends AppCompatActivity {
         btnCancel = findViewById(R.id.cancel);
         myPicture = findViewById(R.id.myPicture);
         client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
+        databasePhotoToHunt = FirebaseDatabase.getInstance().getReference("photoToHunt");
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
         if(Build.VERSION.SDK_INT >= 23){
             requestPermissions(new String[] {Manifest.permission.CAMERA,
@@ -69,6 +87,14 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dispatchPictureTakerAction();
+            }
+        });
+
+        btnValidatePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ID = databasePhotoToHunt.push().getKey();
+                uploadPhoto();
             }
         });
 
@@ -135,8 +161,10 @@ public class CameraActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Location location) {
                         if(location != null){
-                            userLatitude.setText("Latitude : " + location.getLatitude());
-                            userLongitude.setText("Longitude : " + location.getLongitude());
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                            userLatitude.setText("Latitude : " + latitude);
+                            userLongitude.setText("Longitude : " + longitude);
                         }
                     }
                 });
@@ -170,7 +198,7 @@ public class CameraActivity extends AppCompatActivity {
             if(photoFile != null){
 
                 pathToFile = photoFile.getAbsolutePath();
-                Uri photoURI = FileProvider.getUriForFile(CameraActivity.this, "com.esgi.picturehunt.fileprovider", photoFile);
+                photoURI = FileProvider.getUriForFile(CameraActivity.this, "com.esgi.picturehunt.fileprovider", photoFile);
                 takePic.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePic, 1);
             }
@@ -188,6 +216,53 @@ public class CameraActivity extends AppCompatActivity {
             Log.d(CAMERA_LOG, "Exception" + e.toString());
         }
         return image;
+    }
+
+    private void addPhotoToHunt(){
+        //TODO : pour modUser > mettre le nom/prénom de l'utilisateur connecté
+        PhotoToHunt photoToHunt = new PhotoToHunt("MCA", image, latitude, longitude);
+
+        databasePhotoToHunt.child(ID).setValue(photoToHunt);
+
+        Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+    }
+
+    private void uploadPhoto() {
+        if(photoURI != null){
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading ...");
+            progressDialog.show();
+
+            final StorageReference ref = storageReference.child("images/" + ID);
+            ref.putFile(photoURI)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    image = uri.toString();
+                                    addPhotoToHunt();
+                                }
+                            });
+                            progressDialog.dismiss();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            Toast.makeText(CameraActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                            progressDialog.setMessage("Uploaded " + (int)progress + "%");
+                        }
+                    });
+        }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
