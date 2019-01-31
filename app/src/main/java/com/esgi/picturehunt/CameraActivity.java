@@ -181,6 +181,7 @@ public class CameraActivity extends AppCompatActivity {
                         android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
                     return;
                 }
+
                 client.getLastLocation().addOnSuccessListener(CameraActivity.this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
@@ -193,8 +194,13 @@ public class CameraActivity extends AppCompatActivity {
                     }
                 });
 
-                Bitmap bitmap = BitmapFactory.decodeFile(pathToFile);
-                myPicture.setImageBitmap(bitmap);
+                try{
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), photoURI);
+                    myPicture.setImageBitmap(bitmap);
+                }catch(IOException e){
+                    Log.d(CAMERA_LOG, "Exception : " + e.toString());
+                }
+
                 btnTakePicture.setVisibility(View.INVISIBLE);
                 btnCancel.setVisibility(VISIBLE);
                 btnValidatePicture.setVisibility(VISIBLE);
@@ -231,7 +237,7 @@ public class CameraActivity extends AppCompatActivity {
         try {
             image = File.createTempFile(name, ".jpg", storageDir);
         } catch (IOException e) {
-            Log.d(CAMERA_LOG, "Exception" + e.toString());
+            Log.d(CAMERA_LOG, "Exception : " + e.toString());
         }
         return image;
     }
