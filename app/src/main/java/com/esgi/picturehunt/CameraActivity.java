@@ -299,8 +299,7 @@ public class CameraActivity extends AppCompatActivity {
                             intentSelected = new Intent(CameraActivity.this, MainActivity.class);
                             break;
                         case R.id.nav_camera:
-                            intentSelected = new Intent(CameraActivity.this, CameraActivity.class);
-                            break;
+                            return true;
                         case R.id.nav_settings:
                             intentSelected = new Intent(CameraActivity.this, SettingsActivity.class);
                             break;

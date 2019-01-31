@@ -235,8 +235,7 @@ public class SettingsActivity extends AppCompatActivity {
                             intentSelected = new Intent(SettingsActivity.this, CameraActivity.class);
                             break;
                         case R.id.nav_settings:
-                            intentSelected = new Intent(SettingsActivity.this, SettingsActivity.class);
-                            break;
+                            return true;
                     }
                     startActivity(intentSelected);
                     finish();

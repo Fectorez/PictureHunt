@@ -6,22 +6,25 @@
     app:cardBackgroundColor="#fff"
     app:cardCornerRadius="3dp"
     app:cardElevation="3dp"
-    app:contentPadding="5dp"
     app:cardUseCompatPadding="true">
+
+    <!--app:contentPadding="5dp"-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#f6d6d6">
 
         <TextView
             android:id="@+id/userID"
             android:text="User ID"
             android:textColor="#000"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textAlignment="center"/>
 
         <ImageView
             android:id="@+id/image"
@@ -34,16 +37,20 @@
         <TextView
             android:id="@+id/latitude"
             android:text="Latitude"
-            android:textSize="20sp"
+            android:textSize="18sp"
+            android:textStyle="italic"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textAlignment="center"/>
 
         <TextView
             android:id="@+id/longitude"
             android:text="Longitude"
-            android:textSize="20sp"
+            android:textSize="18sp"
+            android:textStyle="italic"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textAlignment="center"/>
 
     </LinearLayout>
 

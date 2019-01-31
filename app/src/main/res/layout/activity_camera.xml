@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CameraActivity"
-    android:background="@android:color/holo_blue_dark">
+    android:background="#ebae93">
 
     <Button
         android:id="@+id/takePicture"
@@ -48,7 +48,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_navigation"
-        android:background="@android:color/white"/>
+        android:background="@android:color/white"
+        app:itemTextColor="#600c0c"
+        app:itemIconTint="#600c0c"/>
 
     <Button
         android:id="@+id/validatePicture"

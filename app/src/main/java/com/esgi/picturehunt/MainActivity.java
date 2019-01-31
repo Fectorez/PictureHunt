@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
             goToLogin();
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("PhotosToHunt List");
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -123,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
                     switch (item.getItemId()) {
                         case R.id.nav_home:
-                            intentSelected = new Intent(MainActivity.this, MainActivity.class);
-                            break;
+                            return true;
                         case R.id.nav_camera:
                             intentSelected = new Intent(MainActivity.this, CameraActivity.class);
                             break;
