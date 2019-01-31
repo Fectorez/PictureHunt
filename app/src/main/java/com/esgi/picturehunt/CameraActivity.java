@@ -45,13 +45,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
+import static android.view.View.VISIBLE;
 
 public class CameraActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_CAMERA = "LIFE_CYCLE_CAMERA";
     public static final String CAMERA_LOG = "CAMERA_LOG";
 
-    private TextView userLatitude, userLongitude;
+    private TextView userLatitude, userLongitude, noGeoloc;
     private Button btnTakePicture, btnValidatePicture, btnCancel;
     private ImageView myPicture;
     private FusedLocationProviderClient client;
@@ -76,6 +77,7 @@ public class CameraActivity extends AppCompatActivity {
 
         userLatitude = findViewById(R.id.userLatitude);
         userLongitude = findViewById(R.id.userLongitude);
+        noGeoloc = findViewById(R.id.noGeoloc);
         btnTakePicture = findViewById(R.id.takePicture);
         btnValidatePicture = findViewById(R.id.validatePicture);
         btnCancel = findViewById(R.id.cancel);
@@ -194,10 +196,13 @@ public class CameraActivity extends AppCompatActivity {
                 Bitmap bitmap = BitmapFactory.decodeFile(pathToFile);
                 myPicture.setImageBitmap(bitmap);
                 btnTakePicture.setVisibility(View.INVISIBLE);
-                btnValidatePicture.setVisibility(View.VISIBLE);
-                btnCancel.setVisibility(View.VISIBLE);
-                userLatitude.setVisibility(View.VISIBLE);
-                userLongitude.setVisibility(View.VISIBLE);
+                btnCancel.setVisibility(VISIBLE);
+                btnValidatePicture.setVisibility(VISIBLE);
+                userLatitude.setVisibility(VISIBLE);
+                userLongitude.setVisibility(VISIBLE);
+
+                //TODO : Afficher ce TextView si pas de géolocalisation (pour Maxence)
+                //noGeoloc.setVisibility(VISIBLE);
             }
         }
     }

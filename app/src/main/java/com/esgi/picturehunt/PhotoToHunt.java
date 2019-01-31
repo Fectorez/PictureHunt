@@ -1,10 +1,10 @@
 package com.esgi.picturehunt;
 
 public class PhotoToHunt {
-    String userId;
-    String image;
-    double latitude;
-    double longitude;
+    private String userId;
+    private String image;
+    private double latitude;
+    private double longitude;
 
     public PhotoToHunt(){
     }
@@ -20,7 +20,7 @@ public class PhotoToHunt {
         return userId;
     }
 
-    public String image() {
+    public String getImage() {
         return image;
     }
 

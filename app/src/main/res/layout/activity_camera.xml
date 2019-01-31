@@ -114,4 +114,21 @@
         app:layout_constraintTop_toBottomOf="@+id/userLatitude"
         app:layout_constraintVertical_bias="0.32999998" />
 
+    <TextView
+        android:id="@+id/noGeoloc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Merci d'activer la géolocalisation pour pouvoir ajouter une photo"
+        android:visibility="invisible"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/myPicture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.13" />
+
 </android.support.constraint.ConstraintLayout>
