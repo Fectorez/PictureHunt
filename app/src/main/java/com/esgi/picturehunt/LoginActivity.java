@@ -24,13 +24,15 @@ public class LoginActivity extends AppCompatActivity {
     private static final String SERVER_CLIENT_ID = "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com";
     public static final int RC_SIGN_IN = 1;
     public static final String AUTH_TAG = "AUTH_TAG";
+
     private GoogleSignInClient mGoogleSignInClient;
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private MyFirebaseAuth myFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        myFirebaseAuth = new MyFirebaseAuth();
         init();
     }
 
@@ -69,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(AUTH_TAG, "firebaseAuthWithGoogle:" + account.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
+        myFirebaseAuth.getAuth().signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {

@@ -51,29 +51,33 @@ public class CameraActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_CAMERA = "LIFE_CYCLE_CAMERA";
     public static final String CAMERA_LOG = "CAMERA_LOG";
+    public static final String REFERENCE_PHOTOS_TO_HUNT = "photosToHunt";
+
+    private String ID, image;
+    private double latitude, longitude;
 
     private TextView userLatitude, userLongitude, noGeoloc;
     private Button btnTakePicture, btnValidatePicture, btnCancel;
     private ImageView myPicture;
     private FusedLocationProviderClient client;
-    private DatabaseReference databasePhotoToHunt;
-    private FirebaseStorage storage;
-    private StorageReference storageReference;
+    private MyFirebaseDatabase myFirebaseDatabase;
+    private MyFirebaseStorage myFirebaseStorage;
+    private MyFirebaseAuth myFirebaseAuth;
     private Uri photoURI;
-
-    private String pathToFile, ID, image;
-    private double latitude, longitude;
-
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private FirebaseUser mUser = mAuth.getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        if ( mUser == null )
+        myFirebaseAuth = new MyFirebaseAuth();
+        if ( myFirebaseAuth.getUser() == null ){
             goToLogin();
+        }
+
+        myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
+        myFirebaseStorage = new MyFirebaseStorage();
+        client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
 
         userLatitude = findViewById(R.id.userLatitude);
         userLongitude = findViewById(R.id.userLongitude);
@@ -83,10 +87,12 @@ public class CameraActivity extends AppCompatActivity {
         btnCancel = findViewById(R.id.cancel);
         myPicture = findViewById(R.id.myPicture);
 
-        client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
-        databasePhotoToHunt = FirebaseDatabase.getInstance().getReference("photosToHunt");
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+        Menu menu = bottomNav.getMenu();
+        MenuItem menuItem = menu.getItem(1);
+        menuItem.setChecked(true);
 
         if(Build.VERSION.SDK_INT >= 24){
             requestPermissions(new String[] {Manifest.permission.CAMERA,
@@ -104,7 +110,7 @@ public class CameraActivity extends AppCompatActivity {
         btnValidatePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ID = databasePhotoToHunt.push().getKey();
+                ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
                 uploadPhoto();
             }
         });
@@ -117,16 +123,6 @@ public class CameraActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-        //Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //startActivityForResult(intent, 0);
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setOnNavigationItemSelectedListener(navListener);
-
-        Menu menu = bottomNav.getMenu();
-        MenuItem menuItem = menu.getItem(1);
-        menuItem.setChecked(true);
     }
 
     private void goToLogin() {
@@ -220,8 +216,6 @@ public class CameraActivity extends AppCompatActivity {
             photoFile = createPhotoFile();
 
             if(photoFile != null){
-
-                pathToFile = photoFile.getAbsolutePath();
                 photoURI = FileProvider.getUriForFile(CameraActivity.this, "com.esgi.picturehunt.fileprovider", photoFile);
                 takePic.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePic, 1);
@@ -243,9 +237,9 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void addPhotoToHunt(){
-        PhotoToHunt photoToHunt = new PhotoToHunt(mUser.getUid(), image, latitude, longitude);
+        PhotoToHunt photoToHunt = new PhotoToHunt(myFirebaseAuth.getUser().getUid(), image, latitude, longitude);
 
-        databasePhotoToHunt.child(ID).setValue(photoToHunt);
+        myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
 
         Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
     }
@@ -256,7 +250,7 @@ public class CameraActivity extends AppCompatActivity {
             progressDialog.setTitle("Uploading ...");
             progressDialog.show();
 
-            final StorageReference ref = storageReference.child("images/photosToHunt/" + ID);
+            final StorageReference ref = myFirebaseStorage.getStorageReference().child("images/photosToHunt/" + ID);
             ref.putFile(photoURI)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override

@@ -22,13 +22,11 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_MAIN = "LIFE_CYCLE_MAIN";
+    public static final String REFERENCE_PHOTOS_TO_HUNT = "photosToHunt";
 
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private FirebaseUser mUser = mAuth.getCurrentUser();
-
-    RecyclerView recyclerView;
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference reference;
+    private RecyclerView recyclerView;
+    private MyFirebaseDatabase myFirebaseDatabase;
+    private MyFirebaseAuth myFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,17 +34,16 @@ public class MainActivity extends AppCompatActivity {
         Log.i(LIFE_CYCLE_MAIN, "onCreate");
         setContentView(R.layout.activity_main);
 
-        if ( mUser == null )
-            goToLogin();
+        myFirebaseAuth = new MyFirebaseAuth();
 
-        ActionBar actionBar = getSupportActionBar();
+        if ( myFirebaseAuth.getUser() == null )
+            goToLogin();
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        reference = firebaseDatabase.getReference("photosToHunt");
+        myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -72,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                         PhotoToHunt.class,
                         R.layout.row_photo_to_hunt,
                         ViewHolder.class,
-                        reference
+                        myFirebaseDatabase.getDatabaseReference()
                 ) {
                     @Override
                     protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {

@@ -46,42 +46,42 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String LIFE_CYCLE_SETTINGS = "LIFE_CYCLE_SETTINGS";
 
     private static final String SERVER_CLIENT_ID = "210033024094-mv75596k5dfg2gde1516enoadn9n7f6u.apps.googleusercontent.com";
-    public static final int RC_SIGN_IN = 1;
-    public static final String AUTH_TAG = "AUTH_TAG";
     private static final int DEFAULT_PROGRESS = 2;
     private static final int DEFAULT_RADIUS = 3;
+
     private Button mSignOutButton;
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private FirebaseUser mUser;
     private TextView mScore;
     private SeekBar mSeekBar;
     private TextView mRadius;
-    private DatabaseReference mUsersListRef;
-    private DatabaseReference mUserRef;
-    private DatabaseReference mRadiusRef;
+
+    private MyFirebaseAuth myFirebaseAuth;
+    private MyFirebaseDatabase myFirebaseDatabase, mUsersListRef, mUserRef, mRadiusRef, mScoreRef;
 
     private void setAttributes() {
         mSignOutButton = findViewById(R.id.sign_out_buton);
         mScore = findViewById(R.id.score);
         mSeekBar = findViewById(R.id.seekBar);
         mRadius = findViewById(R.id.radius);
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-        mUsersListRef = dbRef.child("users");
-        mUser = mAuth.getCurrentUser();
+
+        myFirebaseAuth = new MyFirebaseAuth();
+        myFirebaseDatabase = new MyFirebaseDatabase();
+        mUsersListRef = new MyFirebaseDatabase(myFirebaseDatabase.getDatabaseReference(), "users");
+        mUserRef = new MyFirebaseDatabase(mUsersListRef.getDatabaseReference(), myFirebaseAuth.getUser().getUid());
+        mRadiusRef = new MyFirebaseDatabase(mUserRef.getDatabaseReference(), "radius");
+        mScoreRef = new MyFirebaseDatabase(mUserRef.getDatabaseReference(), "score");
     }
 
     private void initSignOutButton() {
         mSignOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signOut();
+                myFirebaseAuth.getAuth().signOut();
                 GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(SERVER_CLIENT_ID)
                         .requestEmail()
                         .build();
                 GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(SettingsActivity.this, gso);
                 googleSignInClient.signOut();
-                mUser = mAuth.getCurrentUser();
                 goToLogin();
             }
         });
@@ -99,7 +99,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mRadiusRef.setValue(seekBar.getProgress()+1);
+                mRadiusRef.getDatabaseReference().setValue(seekBar.getProgress()+1);
             }
         });
     }
@@ -126,8 +126,9 @@ public class SettingsActivity extends AppCompatActivity {
         initSignOutButton();
         initSeekBar();
 
-        if ( mUser == null )
+        if ( myFirebaseAuth.getUser() == null ){
             goToLogin();
+        }
         else {
             initRadiusAndScore();
             initPhoto();
@@ -135,7 +136,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initPhoto() {
-        Uri photoUrl = mUser.getPhotoUrl();
+        Uri photoUrl = myFirebaseAuth.getUser().getPhotoUrl();
         ImageView imageView = findViewById(R.id.profilePicture);
         if ( photoUrl != null ) {
             Picasso.get()
@@ -152,20 +153,17 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initRadiusAndScore() {
-        mUsersListRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        mUsersListRef.getDatabaseReference().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mUserRef = mUsersListRef.child(mUser.getUid());
-                mRadiusRef = mUserRef.child("radius");
-                DatabaseReference scoreRef = mUserRef.child("score");
-                if (!dataSnapshot.hasChild(mUser.getUid())) {
+                if (!dataSnapshot.hasChild(myFirebaseAuth.getUser().getUid())) {
                     // user pas connu donc init ses attributs
-                    mRadiusRef.setValue(DEFAULT_RADIUS);
+                    mRadiusRef.getDatabaseReference().setValue(DEFAULT_RADIUS);
                     mSeekBar.setProgress(DEFAULT_PROGRESS);
-                    scoreRef.setValue(0);
+                    mScoreRef.getDatabaseReference().setValue(0);
                 } else {
                     // user connu donc on va chercher ses attributs
-                    mRadiusRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    mRadiusRef.getDatabaseReference().addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             mSeekBar.setProgress(toIntExact((long)dataSnapshot.getValue()-1), false);
@@ -174,7 +172,7 @@ public class SettingsActivity extends AppCompatActivity {
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {}
                     });
-                    scoreRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    mScoreRef.getDatabaseReference().addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             mScore.setText(String.valueOf((long)dataSnapshot.getValue()));
