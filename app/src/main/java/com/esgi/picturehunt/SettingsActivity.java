@@ -54,7 +54,6 @@ public class SettingsActivity extends AppCompatActivity {
     private SeekBar mSeekBar;
     private TextView mRadius;
 
-    private MyFirebaseAuth myFirebaseAuth;
     private MyFirebaseDatabase myFirebaseDatabase, mUsersListRef, mUserRef, mRadiusRef, mScoreRef;
 
     private void setAttributes() {
@@ -63,10 +62,9 @@ public class SettingsActivity extends AppCompatActivity {
         mSeekBar = findViewById(R.id.seekBar);
         mRadius = findViewById(R.id.radius);
 
-        myFirebaseAuth = new MyFirebaseAuth();
         myFirebaseDatabase = new MyFirebaseDatabase();
         mUsersListRef = new MyFirebaseDatabase(myFirebaseDatabase.getDatabaseReference(), "users");
-        mUserRef = new MyFirebaseDatabase(mUsersListRef.getDatabaseReference(), myFirebaseAuth.getUser().getUid());
+        mUserRef = new MyFirebaseDatabase(mUsersListRef.getDatabaseReference(), MyFirebaseAuth.getUser().getUid());
         mRadiusRef = new MyFirebaseDatabase(mUserRef.getDatabaseReference(), "radius");
         mScoreRef = new MyFirebaseDatabase(mUserRef.getDatabaseReference(), "score");
     }
@@ -75,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
         mSignOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                myFirebaseAuth.getAuth().signOut();
+                MyFirebaseAuth.getAuth().signOut();
                 GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(SERVER_CLIENT_ID)
                         .requestEmail()
@@ -126,17 +124,18 @@ public class SettingsActivity extends AppCompatActivity {
         initSignOutButton();
         initSeekBar();
 
-        if ( myFirebaseAuth.getUser() == null ){
+        if ( MyFirebaseAuth.getUser() == null ){
             goToLogin();
         }
         else {
             initRadiusAndScore();
             initPhoto();
+            ((TextView)findViewById(R.id.pseudo)).setText(MyFirebaseAuth.getUser().getDisplayName());
         }
     }
 
     private void initPhoto() {
-        Uri photoUrl = myFirebaseAuth.getUser().getPhotoUrl();
+        Uri photoUrl = MyFirebaseAuth.getUser().getPhotoUrl();
         ImageView imageView = findViewById(R.id.profilePicture);
         if ( photoUrl != null ) {
             Picasso.get()
@@ -156,7 +155,7 @@ public class SettingsActivity extends AppCompatActivity {
         mUsersListRef.getDatabaseReference().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild(myFirebaseAuth.getUser().getUid())) {
+                if (!dataSnapshot.hasChild(MyFirebaseAuth.getUser().getUid())) {
                     // user pas connu donc init ses attributs
                     mRadiusRef.getDatabaseReference().setValue(DEFAULT_RADIUS);
                     mSeekBar.setProgress(DEFAULT_PROGRESS);

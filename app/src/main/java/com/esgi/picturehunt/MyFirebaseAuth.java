@@ -6,17 +6,22 @@ import com.google.firebase.auth.FirebaseUser;
 public class MyFirebaseAuth {
     private FirebaseAuth auth;
     private FirebaseUser user;
+    private static MyFirebaseAuth instance;
 
-    public MyFirebaseAuth(){
+    private MyFirebaseAuth(){
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
     }
 
-    public FirebaseAuth getAuth() {
-        return auth;
+    public static FirebaseAuth getAuth() {
+        if ( instance == null )
+            instance = new MyFirebaseAuth();
+        return instance.auth;
     }
 
-    public FirebaseUser getUser() {
-        return user;
+    public static FirebaseUser getUser() {
+        if ( instance == null )
+            instance = new MyFirebaseAuth();
+        return instance.user;
     }
 }

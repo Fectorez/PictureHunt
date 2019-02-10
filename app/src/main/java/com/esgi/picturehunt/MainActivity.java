@@ -26,17 +26,14 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private MyFirebaseDatabase myFirebaseDatabase;
-    private MyFirebaseAuth myFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(LIFE_CYCLE_MAIN, "onCreate");
         setContentView(R.layout.activity_main);
+        Log.i(LIFE_CYCLE_MAIN, "onCreate");
 
-        myFirebaseAuth = new MyFirebaseAuth();
-
-        if ( myFirebaseAuth.getUser() == null )
+        if ( MyFirebaseAuth.getUser() == null )
             goToLogin();
 
         recyclerView = findViewById(R.id.recyclerView);

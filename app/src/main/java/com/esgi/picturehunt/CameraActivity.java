@@ -62,7 +62,6 @@ public class CameraActivity extends AppCompatActivity {
     private FusedLocationProviderClient client;
     private MyFirebaseDatabase myFirebaseDatabase;
     private MyFirebaseStorage myFirebaseStorage;
-    private MyFirebaseAuth myFirebaseAuth;
     private Uri photoURI;
 
     @Override
@@ -70,8 +69,7 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        myFirebaseAuth = new MyFirebaseAuth();
-        if ( myFirebaseAuth.getUser() == null ){
+        if ( MyFirebaseAuth.getUser() == null ){
             goToLogin();
         }
 
@@ -237,7 +235,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void addPhotoToHunt(){
-        PhotoToHunt photoToHunt = new PhotoToHunt(myFirebaseAuth.getUser().getUid(), image, latitude, longitude);
+        PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude);
 
         myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
 
