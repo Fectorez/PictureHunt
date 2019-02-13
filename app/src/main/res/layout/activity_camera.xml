@@ -18,8 +18,10 @@
         android:text="TAKE A PICTURE"
         app:layout_constraintBottom_toTopOf="@+id/myPicture"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.756"
         tools:text="TAKE A PICTURE" />
 
     <ImageView
@@ -62,10 +64,11 @@
         android:text="VALIDATE"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/takePicture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.14"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/myPicture"
-        app:layout_constraintVertical_bias="0.26"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.808"
         tools:text="VALIDATE" />
 
     <Button
@@ -80,9 +83,10 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/takePicture"
-        app:layout_constraintTop_toBottomOf="@+id/myPicture"
-        app:layout_constraintVertical_bias="0.26"
+        app:layout_constraintHorizontal_bias="0.781"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.808"
         tools:text="CANCEL" />
 
     <TextView

@@ -160,6 +160,7 @@ public class SettingsActivity extends AppCompatActivity {
                     mRadiusRef.getDatabaseReference().setValue(DEFAULT_RADIUS);
                     mSeekBar.setProgress(DEFAULT_PROGRESS);
                     mScoreRef.getDatabaseReference().setValue(0);
+                    mUserRef.getDatabaseReference().child("displayName").setValue(MyFirebaseAuth.getUser().getDisplayName());
                 } else {
                     // user connu donc on va chercher ses attributs
                     mRadiusRef.getDatabaseReference().addListenerForSingleValueEvent(new ValueEventListener() {

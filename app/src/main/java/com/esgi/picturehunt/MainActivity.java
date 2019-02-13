@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient client;
 
-    private double latitude, longitude;
+    private Location userLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +82,7 @@ public class MainActivity extends AppCompatActivity {
         client.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+                userLocation = location;
             }
         });
 
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 ) {
                     @Override
                     protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
-                        viewHolder.setDetails(getApplicationContext(), model.getUserId(), model.getLatitude(), model.getLongitude(), model.getImage());
+                        viewHolder.setDetails(getApplicationContext(), model, userLocation);
                     }
                 };
 
