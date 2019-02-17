@@ -20,6 +20,8 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 
 public class ViewHolder extends RecyclerView.ViewHolder {
+    public static int PHOTO_PIXELS_X = 300;
+    public static int PHOTO_PIXELS_Y = 200;
 
     View mView;
     TextView mUserID;
@@ -41,16 +43,14 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         photoLocation.setLatitude(photoToHunt.getLatitude());
         photoLocation.setLongitude(photoToHunt.getLongitude());
 
-        float distance = userLocation.distanceTo(photoLocation);
-        String unit = "m";
+        float distanceM = userLocation.distanceTo(photoLocation);
 
-        if ( distance > 1000 ) {
-            distance /= 1000;
-            unit = "km";
-        }
-        distance = Math.round(distance);
+        if ( distanceM < 1000 )
+            return "Moins d'1 km";
 
-        return (int)distance + unit;
+        int distanceKm = Math.round(distanceM/1000);
+
+        return distanceKm + "km";
     }
 
     private void setUserName(String userId) {
@@ -72,6 +72,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         String distance = getDistance(userLocation, photoToHunt);
         setUserName(photoToHunt.getUserId());
         mDistance.setText(distance);
-        Picasso.get().load(photoToHunt.getImage()).into(mImage);
+        Picasso.get().load(photoToHunt.getImage()).resize(PHOTO_PIXELS_X,PHOTO_PIXELS_Y).into(mImage);
     }
 }
