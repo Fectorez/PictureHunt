@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -21,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.support.v4.content.FileProvider;
 import android.widget.TextView;
@@ -43,6 +46,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static android.view.View.VISIBLE;
@@ -56,8 +61,9 @@ public class CameraActivity extends AppCompatActivity {
     private String ID, image;
     private double latitude, longitude;
 
-    private TextView userLatitude, userLongitude, noGeoloc;
-    private Button btnTakePicture, btnValidatePicture, btnCancel;
+    private TextView place, textViewClick , noGeoloc;
+    private Button btnValidatePicture, btnCancel;
+    private ImageButton btnTakePicture;
     private ImageView myPicture;
     private FusedLocationProviderClient client;
     private MyFirebaseDatabase myFirebaseDatabase;
@@ -77,13 +83,13 @@ public class CameraActivity extends AppCompatActivity {
         myFirebaseStorage = new MyFirebaseStorage();
         client = LocationServices.getFusedLocationProviderClient(CameraActivity.this);
 
-        userLatitude = findViewById(R.id.userLatitude);
-        userLongitude = findViewById(R.id.userLongitude);
+        place = findViewById(R.id.place);
         noGeoloc = findViewById(R.id.noGeoloc);
         btnTakePicture = findViewById(R.id.takePicture);
         btnValidatePicture = findViewById(R.id.validatePicture);
         btnCancel = findViewById(R.id.cancel);
         myPicture = findViewById(R.id.myPicture);
+        textViewClick = findViewById(R.id.textViewClick);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -182,8 +188,19 @@ public class CameraActivity extends AppCompatActivity {
                         if(location != null){
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
-                            userLatitude.setText("Latitude : " + latitude);
-                            userLongitude.setText("Longitude : " + longitude);
+                            Geocoder gcd = new Geocoder(CameraActivity.this, Locale.getDefault());
+                            List<Address> addresses = null;
+                            try {
+                                addresses = gcd.getFromLocation(latitude, longitude, 1);
+                                if (addresses.size() > 0) {
+                                    place.setText("Lieu : " + addresses.get(0).getLocality());
+                                }
+                                else {
+                                    Toast.makeText(CameraActivity.this, "Erreur lors de la conversion en lieu.", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 });
@@ -198,8 +215,8 @@ public class CameraActivity extends AppCompatActivity {
                 btnTakePicture.setVisibility(View.INVISIBLE);
                 btnCancel.setVisibility(VISIBLE);
                 btnValidatePicture.setVisibility(VISIBLE);
-                userLatitude.setVisibility(VISIBLE);
-                userLongitude.setVisibility(VISIBLE);
+                place.setVisibility(VISIBLE);
+                textViewClick.setVisibility(View.INVISIBLE);
 
                 //TODO : Afficher ce TextView si pas de géolocalisation (pour Maxence)
                 //noGeoloc.setVisibility(VISIBLE);
