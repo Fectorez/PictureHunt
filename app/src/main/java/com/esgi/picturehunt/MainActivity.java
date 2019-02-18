@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -69,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    private void goToSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -95,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
                 ) {
                     @Override
                     protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
-                        viewHolder.setDetails(getApplicationContext(), model, userLocation);
+                        if ( userLocation == null ) {
+                            Toast.makeText(MainActivity.this, "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
+                            //goToSettings();
+                        }
+                        else
+                            viewHolder.setDetails(getApplicationContext(), model, userLocation);
                     }
                 };
 

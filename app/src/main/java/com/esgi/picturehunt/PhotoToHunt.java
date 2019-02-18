@@ -31,4 +31,14 @@ public class PhotoToHunt {
     public double getLongitude() {
         return longitude;
     }
+
+    @Override
+    public String toString() {
+        return "PhotoToHunt{" +
+                "userId='" + userId + '\'' +
+                ", image='" + image + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
+    }
 }
