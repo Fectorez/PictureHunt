@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,7 +30,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
     View mView;
     TextView mUserID;
     TextView mDistance;
-    ImageView mImage;
+    ImageView mImage, mImageView;
 
     public ViewHolder(View itemView){
         super(itemView);
@@ -39,6 +40,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         mUserID = mView.findViewById(R.id.userID);
         mDistance = mView.findViewById(R.id.distance);
         mImage = mView.findViewById(R.id.image);
+        mImageView = mView.findViewById(R.id.loadingImageView);
     }
 
     private static String getDistance(Location userLocation, PhotoToHunt photoToHunt) {
@@ -77,6 +79,7 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         final String distance = getDistance(userLocation, photoToHunt);
         setUserName(photoToHunt.getUserId());
         mDistance.setText(distance);
+        Glide.with(context).load(R.drawable.loading).into(mImageView);
         Picasso.get().load(photoToHunt.getImage()).resize(PHOTO_PIXELS_X,PHOTO_PIXELS_Y).into(mImage);
 
         mImage.setOnClickListener(new View.OnClickListener() {
