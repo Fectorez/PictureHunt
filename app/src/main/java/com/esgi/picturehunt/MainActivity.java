@@ -7,6 +7,8 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -50,9 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
         client = LocationServices.getFusedLocationProviderClient(MainActivity.this);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //recyclerView = findViewById(R.id.recyclerView);
+        //recyclerView.setHasFixedSize(true);
+        //recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
 
@@ -62,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
         Menu menu = bottomNav.getMenu();
         MenuItem menuItem = menu.getItem(0);
         menuItem.setChecked(true);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.container, new ListFragment()).commit();
     }
 
     private void goToLogin() {
@@ -80,38 +86,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Log.i(LIFE_CYCLE_MAIN, "onStart");
-
-        if(ActivityCompat.checkSelfPermission(
-                MainActivity.this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            return;
-        }
-        client.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                userLocation = location;
-            }
-        });
-
-        FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder>(
-                        PhotoToHunt.class,
-                        R.layout.row_photo_to_hunt,
-                        ViewHolder.class,
-                        myFirebaseDatabase.getDatabaseReference()
-                ) {
-                    @Override
-                    protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
-                        if ( userLocation == null ) {
-                            Toast.makeText(MainActivity.this, "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
-                            //goToSettings();
-                        }
-                        else
-                            viewHolder.setDetails(getApplicationContext(), model, userLocation);
-                    }
-                };
-
-        recyclerView.setAdapter(firebaseRecyclerAdapter);
     }
 
     @Override

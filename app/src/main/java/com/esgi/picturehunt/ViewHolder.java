@@ -2,12 +2,17 @@ package com.esgi.picturehunt;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -68,10 +73,23 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setDetails(Context context, PhotoToHunt photoToHunt, Location userLocation) {
-        String distance = getDistance(userLocation, photoToHunt);
+    public void setDetails(final Context context, final PhotoToHunt photoToHunt, Location userLocation) {
+        final Bundle bundle = new Bundle();
+        final String distance = getDistance(userLocation, photoToHunt);
         setUserName(photoToHunt.getUserId());
         mDistance.setText(distance);
         Picasso.get().load(photoToHunt.getImage()).resize(PHOTO_PIXELS_X,PHOTO_PIXELS_Y).into(mImage);
+
+        mImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                Fragment fragment = new DetailsFragment();
+                activity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
     }
 }
