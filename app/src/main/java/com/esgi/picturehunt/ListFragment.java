@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,26 +64,27 @@ public class ListFragment extends Fragment {
             @Override
             public void onSuccess(Location location) {
                 userLocation = location;
+                Log.i("AZE", "getuserlocation");
+                FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder> firebaseRecyclerAdapter =
+                        new FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder>(
+                                PhotoToHunt.class,
+                                R.layout.row_photo_to_hunt,
+                                ViewHolder.class,
+                                myFirebaseDatabase.getDatabaseReference()
+                        ) {
+                            @Override
+                            protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
+                                Log.i("AZE", "userLocation null =" + ( userLocation==null ? "yes" : "no"));
+                                if ( userLocation == null ) {
+                                    Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    viewHolder.setDetails(getContext(), model, userLocation);
+                                }
+                            }
+                        };
+                recyclerView.setAdapter(firebaseRecyclerAdapter);
             }
         });
-
-        FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder> firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder>(
-                        PhotoToHunt.class,
-                        R.layout.row_photo_to_hunt,
-                        ViewHolder.class,
-                        myFirebaseDatabase.getDatabaseReference()
-                ) {
-                    @Override
-                    protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
-                        if ( userLocation == null ) {
-                            Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            viewHolder.setDetails(getContext(), model, userLocation);
-                        }
-                    }
-                };
-        recyclerView.setAdapter(firebaseRecyclerAdapter);
     }
 }
