@@ -19,13 +19,13 @@
 
         <TextView
             android:id="@+id/userID"
-            android:text="User ID"
-            android:textColor="#000"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center"/>
+            android:text="Chargement..."
+            android:textAlignment="center"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -70,7 +70,7 @@
             android:id="@+id/distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="_DISTANCE_"
+            android:text="Chargement..."
             android:textAlignment="center"
             android:textSize="18sp"
             android:textStyle="italic" />
