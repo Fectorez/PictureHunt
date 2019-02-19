@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,15 +77,12 @@ public class ListFragment extends Fragment {
                     protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
                         if ( userLocation == null ) {
                             Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
-                            //goToSettings();
                         }
                         else {
                             viewHolder.setDetails(getContext(), model, userLocation);
                         }
                     }
                 };
-
-        Log.i("MAXENCE", firebaseRecyclerAdapter.toString());
         recyclerView.setAdapter(firebaseRecyclerAdapter);
     }
 }

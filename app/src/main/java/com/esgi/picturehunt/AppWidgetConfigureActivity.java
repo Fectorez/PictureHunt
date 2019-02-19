@@ -10,8 +10,6 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.util.Locale;
-
 /**
  * The configuration screen for the {@link AppWidget AppWidget} AppWidget.
  */

@@ -1,6 +1,8 @@
 package com.esgi.picturehunt;
 
-public class PhotoToHunt {
+import java.io.Serializable;
+
+public class PhotoToHunt implements Serializable {
     private String userId;
     private String image;
     private double latitude;
