@@ -55,7 +55,7 @@ public class CameraActivity extends AppCompatActivity {
     private String ID, image;
     private double latitude, longitude;
 
-    private TextView place, textViewClick , noGeoloc;
+    private TextView place, textViewClick, noGeoloc;
     private Button btnValidatePicture, btnCancel;
     private ImageButton btnTakePicture;
     private ImageView myPicture;
@@ -91,12 +91,6 @@ public class CameraActivity extends AppCompatActivity {
         Menu menu = bottomNav.getMenu();
         MenuItem menuItem = menu.getItem(1);
         menuItem.setChecked(true);
-
-        if(Build.VERSION.SDK_INT >= 24){
-            requestPermissions(new String[] {Manifest.permission.CAMERA,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.ACCESS_FINE_LOCATION}, 2);
-        }
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
