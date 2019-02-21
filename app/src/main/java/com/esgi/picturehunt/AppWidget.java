@@ -43,17 +43,15 @@ public class AppWidget extends AppWidgetProvider {
                 for (DataSnapshot photoSnapshot : dataSnapshot.getChildren()) {
                     Map photoValues = (HashMap)photoSnapshot.getValue();
                     PhotoToHunt photoToHunt = new PhotoToHunt((String)photoValues.get("userId"), (String)photoValues.get("image"), (double)photoValues.get("latitude"), (double)photoValues.get("longitude"));
-                    Log.i("TUTU", photoToHunt.toString());
                     Location photoLocation = new Location("photoLocation");
                     photoLocation.setLatitude(photoToHunt.getLatitude());
                     photoLocation.setLongitude(photoToHunt.getLongitude());
                     float distanceM = userLocation.distanceTo(photoLocation);
                     if ( distanceM <= radius*1000 ) {
                         nbPicturesInThisRadius++;
-                        Log.i("TUTU", "distanceM=" + distanceM + "< radius=" + radius*1000);
                     }
                 }
-                String toDisp = "Dans un rayon de " + radius + "km : " + nbPicturesInThisRadius + " photos";
+                String toDisp = nbPicturesInThisRadius + " photos trouvées dans un rayon de " + radius + "km";
 
                 // Construct the RemoteViews object
                 RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
