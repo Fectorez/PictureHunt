@@ -56,11 +56,16 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if ( requestCode == RC_SIGN_IN ) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            GoogleSignInAccount account = task.getResult();
-            if ( account == null )
-                Toast.makeText(this, "Echec lors de l'authentification avec Google", Toast.LENGTH_LONG).show();
-            else
-                firebaseAuthWithGoogle(account);
+            GoogleSignInAccount account = null;
+            try {
+                account = task.getResult();
+            } catch(Exception e) {
+            } finally {
+                if ( account == null )
+                    Toast.makeText(this, "Echec lors de l'authentification avec Google. Internet est-il activé ?", Toast.LENGTH_LONG).show();
+                else
+                    firebaseAuthWithGoogle(account);
+            }
         }
     }
 

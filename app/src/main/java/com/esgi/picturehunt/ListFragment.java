@@ -50,7 +50,10 @@ public class ListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(layoutManager);
 
         client = LocationServices.getFusedLocationProviderClient(getActivity());
         myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
@@ -64,7 +67,6 @@ public class ListFragment extends Fragment {
             @Override
             public void onSuccess(Location location) {
                 userLocation = location;
-                Log.i("AZE", "getuserlocation");
                 FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder> firebaseRecyclerAdapter =
                         new FirebaseRecyclerAdapter<PhotoToHunt, ViewHolder>(
                                 PhotoToHunt.class,
@@ -74,7 +76,6 @@ public class ListFragment extends Fragment {
                         ) {
                             @Override
                             protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
-                                Log.i("AZE", "userLocation null =" + ( userLocation==null ? "yes" : "no"));
                                 if ( userLocation == null ) {
                                     Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
                                 }
