@@ -103,7 +103,15 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
+                getPictureInfo();
                 uploadPhoto();
+            }
+
+            private void getPictureInfo() {
+                CloudVisionManager cvm = new CloudVisionManager(CameraActivity.this);
+                cvm.execute(photoURI.toString());
+
+
             }
         });
 
