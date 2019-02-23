@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class CloudVisionManager extends AsyncTask<String,Void,String> {
 
@@ -40,8 +41,8 @@ public class CloudVisionManager extends AsyncTask<String,Void,String> {
         try {
             url = new URL(GOOGLE_VISION_API_URL);
             urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setConnectTimeout(1000);
-            urlConnection.setReadTimeout(1000);
+            urlConnection.setConnectTimeout(15000);
+            urlConnection.setReadTimeout(15000);
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type", "application/json");
             urlConnection.setDoOutput(true);
@@ -76,6 +77,7 @@ public class CloudVisionManager extends AsyncTask<String,Void,String> {
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Toast.makeText(context, "Une erreur est survenue", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }finally {
 

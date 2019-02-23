@@ -103,16 +103,10 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
-                getPictureInfo();
                 uploadPhoto();
-            }
-
-            private void getPictureInfo() {
-                CloudVisionManager cvm = new CloudVisionManager(CameraActivity.this);
-                cvm.execute(photoURI.toString());
-
 
             }
+
         });
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
@@ -271,9 +265,13 @@ public class CameraActivity extends AppCompatActivity {
                                 public void onSuccess(Uri uri) {
                                     image = uri.toString();
                                     addPhotoToHunt();
+                                    CloudVisionManager cvm = new CloudVisionManager(CameraActivity.this);
+                                    cvm.execute(image);
+
                                 }
                             });
                             progressDialog.dismiss();
+
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -290,6 +288,7 @@ public class CameraActivity extends AppCompatActivity {
                             progressDialog.setMessage("Uploaded " + (int)progress + "%");
                         }
                     });
+
         }
     }
 
