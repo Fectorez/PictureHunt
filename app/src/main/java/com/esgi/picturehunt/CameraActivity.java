@@ -1,6 +1,5 @@
 package com.esgi.picturehunt;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,8 +8,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -36,11 +35,18 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -52,7 +58,7 @@ public class CameraActivity extends AppCompatActivity {
     public static final String CAMERA_LOG = "CAMERA_LOG";
     public static final String REFERENCE_PHOTOS_TO_HUNT = "photosToHunt";
 
-    private String ID, image;
+    private String ID, image, result;
     private double latitude, longitude;
 
     private TextView place, textViewClick, noGeoloc;
@@ -103,7 +109,8 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
-                uploadPhoto();
+                Log.i("MAXENCE", "ID : " + ID );
+                //uploadPhoto();
             }
         });
 
@@ -240,16 +247,53 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void addPhotoToHunt(){
-        PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude);
+        String id, desc;
+        double score, topicality;
 
-        myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
+        try{
+            ArrayList<PhotoAttributes> photoAttributes = new ArrayList<>();
+            JSONObject jsonObject = new JSONObject(result);
+            JSONArray jsonArray = jsonObject.getJSONArray("responses");
 
-        Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+            String response = jsonArray.toString().substring(1, jsonArray.toString().length() - 1);
+
+            JSONObject test = new JSONObject(response);
+            JSONArray test2 = test.getJSONArray("labelAnnotations");
+
+            for(int i = 0; i < test2.length(); i++){
+                JSONObject attribute = test2.getJSONObject(i);
+
+                id = attribute.getString("mid");
+                desc = attribute.getString("description");
+                score = attribute.getDouble("score");
+                topicality = attribute.getDouble("topicality");
+
+                PhotoAttributes attr = new PhotoAttributes(id, desc, score, topicality);
+
+                Log.i("MAXENCE", attr.getMid());
+                Log.i("MAXENCE", attr.getDescription());
+                Log.i("MAXENCE", (attr.toString()));
+
+                photoAttributes.add(attr);
+            }
+
+            Log.i("MAXENCE","Count : " + photoAttributes.size());
+
+            PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude, photoAttributes);
+
+            myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
+            Log.i("MAXENCE", "ID : " + ID);
+
+            Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+        } catch (Throwable t){
+            Log.e("My App", "Could not parse malformed JSON");
+        }
     }
 
     private void uploadPhoto() {
         if(photoURI != null){
             final ProgressDialog progressDialog = new ProgressDialog(this);
+
             progressDialog.setTitle("Uploading ...");
             progressDialog.show();
 
@@ -262,6 +306,16 @@ public class CameraActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     image = uri.toString();
+                                    CloudVisionManager cvm = new CloudVisionManager(CameraActivity.this);
+                                    cvm.execute(image);
+
+                                    try{
+                                        Thread.sleep(5000);
+                                    } catch(InterruptedException e){
+                                        e.printStackTrace();
+                                    }
+
+                                    result = cvm.getResult();
                                     addPhotoToHunt();
                                 }
                             });
