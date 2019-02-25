@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -110,7 +111,7 @@ public class CameraActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
                 Log.i("MAXENCE", "ID : " + ID );
-                //uploadPhoto();
+                uploadPhoto();
             }
         });
 
@@ -251,17 +252,17 @@ public class CameraActivity extends AppCompatActivity {
         double score, topicality;
 
         try{
-            ArrayList<PhotoAttributes> photoAttributes = new ArrayList<>();
+            List<PhotoAttributes> photoAttributes = new ArrayList<>();
             JSONObject jsonObject = new JSONObject(result);
             JSONArray jsonArray = jsonObject.getJSONArray("responses");
 
             String response = jsonArray.toString().substring(1, jsonArray.toString().length() - 1);
 
-            JSONObject test = new JSONObject(response);
-            JSONArray test2 = test.getJSONArray("labelAnnotations");
+            JSONObject myJsonObject = new JSONObject(response);
+            JSONArray myJsonArray = myJsonObject.getJSONArray("labelAnnotations");
 
-            for(int i = 0; i < test2.length(); i++){
-                JSONObject attribute = test2.getJSONObject(i);
+            for(int i = 0; i < myJsonArray.length(); i++){
+                JSONObject attribute = myJsonArray.getJSONObject(i);
 
                 id = attribute.getString("mid");
                 desc = attribute.getString("description");
@@ -270,20 +271,12 @@ public class CameraActivity extends AppCompatActivity {
 
                 PhotoAttributes attr = new PhotoAttributes(id, desc, score, topicality);
 
-                Log.i("MAXENCE", attr.getMid());
-                Log.i("MAXENCE", attr.getDescription());
-                Log.i("MAXENCE", (attr.toString()));
-
                 photoAttributes.add(attr);
             }
 
-            Log.i("MAXENCE","Count : " + photoAttributes.size());
-
-            PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude, photoAttributes);
-
+            PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude); //, photoAttributes
             myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
-            Log.i("MAXENCE", "ID : " + ID);
-
+            myFirebaseDatabase.getDatabaseReference().child(ID).child("attributes").setValue(photoAttributes);
             Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
         } catch (Throwable t){
             Log.e("My App", "Could not parse malformed JSON");

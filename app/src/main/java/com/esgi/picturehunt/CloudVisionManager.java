@@ -91,7 +91,6 @@ public class CloudVisionManager extends AsyncTask<String,Void,String> {
 
     @Override
     protected void onPostExecute(String s) {
-        Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 
     public String getResult() {
