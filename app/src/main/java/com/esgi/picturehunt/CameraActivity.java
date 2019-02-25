@@ -274,7 +274,7 @@ public class CameraActivity extends AppCompatActivity {
                 photoAttributes.add(attr);
             }
 
-            PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude); //, photoAttributes
+            PhotoToHunt photoToHunt = new PhotoToHunt(MyFirebaseAuth.getUser().getUid(), image, latitude, longitude, ID);
             myFirebaseDatabase.getDatabaseReference().child(ID).setValue(photoToHunt);
             myFirebaseDatabase.getDatabaseReference().child(ID).child("attributes").setValue(photoAttributes);
             Toast.makeText(CameraActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();

@@ -5,19 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhotoToHunt implements Serializable {
-    private String userId;
-    private String image;
+    private String userId, image, photoId;
     private double latitude;
     private double longitude;
 
     public PhotoToHunt(){
     }
 
-    public PhotoToHunt(String userId, String image, double latitude, double longitude) {
+    public PhotoToHunt(String userId, String image, double latitude, double longitude, String photoId) {
         this.userId = userId;
         this.image = image;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.photoId = photoId;
     }
 
     public String getUserId() {
@@ -34,6 +34,10 @@ public class PhotoToHunt implements Serializable {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public String getPhotoId() {
+        return photoId;
     }
 
     @Override
