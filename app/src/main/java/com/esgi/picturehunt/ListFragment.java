@@ -4,6 +4,7 @@ package com.esgi.picturehunt;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,14 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,6 +39,7 @@ public class ListFragment extends Fragment {
     private MyFirebaseDatabase myFirebaseDatabase;
     private FusedLocationProviderClient client;
     private Location userLocation;
+    private FirebaseUser user;
 
     public ListFragment() {
         // Required empty public constructor
@@ -56,6 +66,7 @@ public class ListFragment extends Fragment {
         layoutManager.setReverseLayout(true);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         client = LocationServices.getFusedLocationProviderClient(getActivity());
         myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
@@ -78,17 +89,39 @@ public class ListFragment extends Fragment {
                                 myFirebaseDatabase.getDatabaseReference()
                         ) {
 
-                            public void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
+                            public void populateViewHolder(final ViewHolder viewHolder, final PhotoToHunt photoToHunt, int position) {
+                                final float distanceM = getDistanceM(userLocation, photoToHunt);
                                 if ( userLocation == null ) {
                                     Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
                                 }
                                 else {
-                                    viewHolder.setDetails(getContext(), model, userLocation);
+                                    FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            Map userData = (Map)dataSnapshot.getValue();
+                                            long userRadius = (long)(userData.get("radius"));
+                                            if ( distanceM < userRadius*1000 )
+                                                viewHolder.setDetails(getContext(), photoToHunt, distanceM);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
                                 }
                             }
                         };
                 recyclerView.setAdapter(firebaseRecyclerAdapter);
             }
         });
+    }
+
+    private static float getDistanceM(Location userLocation, PhotoToHunt photoToHunt) {
+        Location photoLocation = new Location("photoLocation");
+        photoLocation.setLatitude(photoToHunt.getLatitude());
+        photoLocation.setLongitude(photoToHunt.getLongitude());
+
+        return userLocation.distanceTo(photoLocation);
     }
 }

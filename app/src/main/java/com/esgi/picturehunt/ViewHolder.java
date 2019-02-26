@@ -43,21 +43,6 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         mImageView = mView.findViewById(R.id.loadingImageView);
     }
 
-    private static String getDistance(Location userLocation, PhotoToHunt photoToHunt) {
-        Location photoLocation = new Location("photoLocation");
-        photoLocation.setLatitude(photoToHunt.getLatitude());
-        photoLocation.setLongitude(photoToHunt.getLongitude());
-
-        float distanceM = userLocation.distanceTo(photoLocation);
-
-        if ( distanceM < 1000 )
-            return "Moins d'1 km";
-
-        int distanceKm = Math.round(distanceM/1000);
-
-        return distanceKm + "km";
-    }
-
     private void setUserName(String userId) {
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -73,12 +58,15 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setDetails(final Context context, final PhotoToHunt photoToHunt, Location userLocation) {
+    public void setDetails(final Context context, final PhotoToHunt photoToHunt, float distanceM) {
         final Bundle bundle = new Bundle();
         bundle.putSerializable(REFERENCE_PHOTOS_TO_HUNT, photoToHunt);
-        final String distance = getDistance(userLocation, photoToHunt);
         setUserName(photoToHunt.getUserId());
-        mDistance.setText(distance);
+        String distanceS = "Moins d'1 km";
+        if ( distanceM > 1000 ) {
+            distanceS = ( Math.round(distanceM) / 1000 ) + "km";
+        }
+        mDistance.setText(distanceS);
         Glide.with(context).load(R.drawable.loading).into(mImageView);
         Picasso.get().load(photoToHunt.getImage()).resize(PHOTO_PIXELS_X,PHOTO_PIXELS_Y).into(mImage);
 
