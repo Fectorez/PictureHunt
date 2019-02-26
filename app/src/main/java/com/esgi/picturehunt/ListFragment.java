@@ -93,11 +93,11 @@ public class ListFragment extends Fragment {
                         ) {
 
                             public void populateViewHolder(final ViewHolder viewHolder, final PhotoToHunt photoToHunt, int position) {
-                                final float distanceM = getDistanceM(userLocation, photoToHunt);
                                 if ( userLocation == null ) {
                                     Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
                                 }
                                 else {
+                                    final float distanceM = getDistanceM(userLocation, photoToHunt);
                                     FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
