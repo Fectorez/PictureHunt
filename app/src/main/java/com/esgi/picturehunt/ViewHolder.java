@@ -6,9 +6,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -31,6 +34,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
     TextView mUserID;
     TextView mDistance;
     ImageView mImage, mImageView;
+    LinearLayout mLinearLayout;
+    CardView mCardView;
 
     public ViewHolder(View itemView){
         super(itemView);
@@ -41,6 +46,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         mDistance = mView.findViewById(R.id.distance);
         mImage = mView.findViewById(R.id.image);
         mImageView = mView.findViewById(R.id.loadingImageView);
+        mLinearLayout = mView.findViewById(R.id.linearLayout);
+        mCardView = mView.findViewById(R.id.cardView);
     }
 
     private void setUserName(String userId) {
@@ -69,6 +76,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         mDistance.setText(distanceS);
         Glide.with(context).load(R.drawable.loading).into(mImageView);
         Picasso.get().load(photoToHunt.getImage()).resize(PHOTO_PIXELS_X,PHOTO_PIXELS_Y).into(mImage);
+        mCardView.removeView(mLinearLayout);
+        mCardView.addView(mLinearLayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         mImage.setOnClickListener(new View.OnClickListener() {
             @Override
