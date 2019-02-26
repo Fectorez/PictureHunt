@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -40,6 +41,7 @@ public class ListFragment extends Fragment {
     private FusedLocationProviderClient client;
     private Location userLocation;
     private FirebaseUser user;
+    private TextView noPhoto;
 
     public ListFragment() {
         // Required empty public constructor
@@ -67,6 +69,7 @@ public class ListFragment extends Fragment {
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
         user = FirebaseAuth.getInstance().getCurrentUser();
+        noPhoto = view.findViewById(R.id.noPhoto);
 
         client = LocationServices.getFusedLocationProviderClient(getActivity());
         myFirebaseDatabase = new MyFirebaseDatabase(REFERENCE_PHOTOS_TO_HUNT);
@@ -100,8 +103,10 @@ public class ListFragment extends Fragment {
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                             Map userData = (Map)dataSnapshot.getValue();
                                             long userRadius = (long)(userData.get("radius"));
-                                            if ( distanceM < userRadius*1000 )
+                                            if ( distanceM < userRadius*1000 ) {
                                                 viewHolder.setDetails(getContext(), photoToHunt, distanceM);
+                                                noPhoto.setVisibility(View.GONE);
+                                            }
                                         }
 
                                         @Override
