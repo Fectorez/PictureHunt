@@ -1,13 +1,17 @@
 package com.esgi.picturehunt;
 
+import android.provider.ContactsContract;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PhotoToHunt implements Serializable {
     private String userId, image, photoId;
     private double latitude;
     private double longitude;
+    private List<PhotoAttributes> attributes;
 
     public PhotoToHunt(){
     }
@@ -38,6 +42,10 @@ public class PhotoToHunt implements Serializable {
 
     public String getPhotoId() {
         return photoId;
+    }
+
+    public List<PhotoAttributes> getAttributes() {
+        return attributes;
     }
 
     @Override

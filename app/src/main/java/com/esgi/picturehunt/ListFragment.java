@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,6 +35,10 @@ public class ListFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,6 +65,7 @@ public class ListFragment extends Fragment {
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             return;
         }
+
         client.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
@@ -74,8 +77,8 @@ public class ListFragment extends Fragment {
                                 ViewHolder.class,
                                 myFirebaseDatabase.getDatabaseReference()
                         ) {
-                            @Override
-                            protected void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
+
+                            public void populateViewHolder(ViewHolder viewHolder, PhotoToHunt model, int position) {
                                 if ( userLocation == null ) {
                                     Toast.makeText(getContext(), "Veuillez activer la géolocalisation", Toast.LENGTH_SHORT).show();
                                 }

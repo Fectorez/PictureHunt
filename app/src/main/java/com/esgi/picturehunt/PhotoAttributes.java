@@ -1,6 +1,8 @@
 package com.esgi.picturehunt;
 
-public class PhotoAttributes {
+import java.io.Serializable;
+
+public class PhotoAttributes implements Serializable {
     private String mid, description;
     private double score, topicality;
 
@@ -34,7 +36,9 @@ public class PhotoAttributes {
     @Override
     public String toString() {
         return "PhotoAttributes{" +
-                "score=" + score +
+                "mid='" + mid + '\'' +
+                ", description='" + description + '\'' +
+                ", score=" + score +
                 ", topicality=" + topicality +
                 '}';
     }

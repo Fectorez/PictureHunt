@@ -19,7 +19,6 @@ import com.google.android.gms.location.LocationServices;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LIFE_CYCLE_MAIN = "LIFE_CYCLE_MAIN";
-    public static final String REFERENCE_PHOTOS_TO_HUNT = "photosToHunt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
