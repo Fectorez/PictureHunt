@@ -24,6 +24,14 @@ public class PhotoToHunt implements Serializable {
         this.photoId = photoId;
     }
 
+    public PhotoToHunt(String userId, String image, double latitude, double longitude) {
+        this.userId = userId;
+        this.image = image;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.photoId = photoId;
+    }
+
     public String getUserId() {
         return userId;
     }

@@ -208,8 +208,6 @@ public class CameraActivity extends AppCompatActivity {
                 place.setVisibility(VISIBLE);
                 textViewClick.setVisibility(View.INVISIBLE);
 
-                //TODO : Afficher ce TextView si pas de géolocalisation (pour Maxence)
-                //noGeoloc.setVisibility(VISIBLE);
             }
         }
     }
@@ -304,6 +302,9 @@ public class CameraActivity extends AppCompatActivity {
 
                                     result = cvm.getResult();
                                     addPhotoToHunt();
+                                    Intent intent = new Intent(CameraActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
                                 }
                             });
                             progressDialog.dismiss();

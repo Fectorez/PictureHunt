@@ -42,11 +42,10 @@ public class AppWidget extends AppWidgetProvider {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot photoSnapshot : dataSnapshot.getChildren()) {
                     Map photoValues = (HashMap)photoSnapshot.getValue();
-                    //TODO : Pour Jérémy
-                    //PhotoToHunt photoToHunt = new PhotoToHunt((String)photoValues.get("userId"), (String)photoValues.get("image"), (double)photoValues.get("latitude"), (double)photoValues.get("longitude"));
+                    PhotoToHunt photoToHunt = new PhotoToHunt((String)photoValues.get("userId"), (String)photoValues.get("image"), (double)photoValues.get("latitude"), (double)photoValues.get("longitude"));
                     Location photoLocation = new Location("photoLocation");
-                    //photoLocation.setLatitude(photoToHunt.getLatitude());
-                    //photoLocation.setLongitude(photoToHunt.getLongitude());
+                    photoLocation.setLatitude(photoToHunt.getLatitude());
+                    photoLocation.setLongitude(photoToHunt.getLongitude());
                     float distanceM = userLocation.distanceTo(photoLocation);
                     if ( distanceM <= radius*1000 ) {
                         nbPicturesInThisRadius++;

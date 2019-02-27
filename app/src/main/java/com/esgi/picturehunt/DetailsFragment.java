@@ -10,6 +10,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -57,16 +58,17 @@ public class DetailsFragment extends Fragment {
     public static int PHOTO_PIXELS_X = 300;
     public static int PHOTO_PIXELS_Y = 200;
 
-    private List<PhotoAttributes> attributesPhotoHunted = new ArrayList<>();
+    private List<PhotoAttributes> attributesPhotoHunted;
     private List<PhotoAttributes> attributesPhotoToHunt = new ArrayList<>();
     private ImageView imageToHunt, imageHunted;
     private MyFirebaseDatabase myFirebaseDatabase;
     private MyFirebaseStorage myFirebaseStorage;
-    private Button play, validate, cancel;
+    private Button play, validate, cancel, voirScore;
     private FusedLocationProviderClient client;
-    private double longitude, latitude;
+    private Location userLocation;
     private Uri photoURI;
     private String ID, image, result;
+    private int score;
 
     public DetailsFragment() {
     }
@@ -88,6 +90,7 @@ public class DetailsFragment extends Fragment {
         imageToHunt = view.findViewById(R.id.imageToHunt);
         imageHunted = view.findViewById(R.id.imageHunted);
         play = view.findViewById(R.id.play);
+        voirScore = view.findViewById(R.id.voirScore);
         validate = view.findViewById(R.id.validatePhoto);
         cancel = view.findViewById(R.id.cancelPhoto);
         client = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -108,8 +111,26 @@ public class DetailsFragment extends Fragment {
             public void onClick(View v) {
                 ID = myFirebaseDatabase.getDatabaseReference().push().getKey();
                 uploadPhoto();
+                voirScore.setVisibility(View.VISIBLE);
+                validate.setVisibility(View.INVISIBLE);
+                cancel.setVisibility(View.INVISIBLE);
+            }
+        });
 
-                //TODO: Vérifier la géolocalisation et comparer les listes attributesPhotoToHunt et attributesPhotoHunted pour voir si ça correspond
+        voirScore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final float distanceM = getDistanceM(userLocation, photoToHunt);
+
+                if(distanceM < 300){
+                    score = compareAttributes(attributesPhotoToHunt, attributesPhotoHunted);
+                    Toast.makeText(getContext(), "Vous gagnez " + score + " points !", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getContext(), SettingsActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                }
+                else
+                    Toast.makeText(getContext(), "Vous êtes trop loin", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -142,6 +163,7 @@ public class DetailsFragment extends Fragment {
     }
 
     private void uploadPhoto() {
+        result = "";
         if(photoURI != null){
             final ProgressDialog progressDialog = new ProgressDialog(getContext());
 
@@ -161,7 +183,7 @@ public class DetailsFragment extends Fragment {
                                     cvm.execute(image);
 
                                     try{
-                                        Thread.sleep(5000);
+                                        Thread.sleep(4000);
                                     } catch(InterruptedException e){
                                         e.printStackTrace();
                                     }
@@ -192,6 +214,7 @@ public class DetailsFragment extends Fragment {
     }
 
     private void getAttributes(){
+        attributesPhotoHunted = new ArrayList<>();
         String id, desc;
         double score, topicality;
 
@@ -212,13 +235,25 @@ public class DetailsFragment extends Fragment {
                 score = attribute.getDouble("score");
                 topicality = attribute.getDouble("topicality");
 
-                PhotoAttributes attr = new PhotoAttributes(id, desc, score, topicality);
 
+                PhotoAttributes attr = new PhotoAttributes(id, desc, score, topicality);
                 attributesPhotoHunted.add(attr);
             }
         } catch (JSONException e) {
             Log.e("My App", "Could not parse malformed JSON");
         }
+    }
+
+    private int compareAttributes(List<PhotoAttributes> toHunt, List<PhotoAttributes> hunted){
+        int cpt = 0;
+
+        for(int i = 0; i < toHunt.size(); i++){
+            for(int j = 0; j < hunted.size(); j++){
+                if(toHunt.get(i).getMid().equalsIgnoreCase(hunted.get(j).getMid()))
+                    cpt++;
+            }
+        }
+        return cpt;
     }
 
     @Override
@@ -236,8 +271,7 @@ public class DetailsFragment extends Fragment {
                     @Override
                     public void onSuccess(Location location) {
                         if(location != null){
-                            latitude = location.getLatitude();
-                            longitude = location.getLongitude();
+                            userLocation = location;
                             Geocoder gcd = new Geocoder(getContext(), Locale.getDefault());
                         }
                     }
@@ -250,5 +284,13 @@ public class DetailsFragment extends Fragment {
                 play.setVisibility(View.INVISIBLE);
             }
         }
+    }
+
+    private static float getDistanceM(Location userLocation, PhotoToHunt photoToHunt) {
+        Location photoLocation = new Location("photoLocation");
+        photoLocation.setLatitude(photoToHunt.getLatitude());
+        photoLocation.setLongitude(photoToHunt.getLongitude());
+
+        return userLocation.distanceTo(photoLocation);
     }
 }
